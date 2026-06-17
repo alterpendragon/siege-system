@@ -52,3 +52,17 @@ class DatabaseClient:
         """
         self.cursor.execute('SELECT * FROM games;')
         return self.cursor.fetchall()
+    
+    def update_status(self, game_id, new_status):
+        """Updates the completion status of a game.
+
+        Args:
+            game_id: The ID of the game to update.
+            new_status: The new completion status (e.g., 'Playing', 'Completed').
+        """
+        self.cursor.execute('''
+         UPDATE games
+         SET completion_status = ?
+         WHERE id = ?;
+        ''', (new_status, game_id))
+        self.connection.commit()
