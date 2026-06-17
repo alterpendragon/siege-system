@@ -100,3 +100,6 @@ class DatabaseClient:
         self.cursor.execute(query, params)
         return self.cursor.fetchall()
     
+    def close_connection(self):
+        """Closes the database connection."""
+        self.connection.close()
