@@ -43,3 +43,12 @@ class DatabaseClient:
          VALUES (?, ?, ?);
         ''', (title, genre, platform))
         self.connection.commit()
+
+    def get_all_games(self):
+        """Retrieves all games from the database.
+
+        Returns:
+            A list of tuples, each representing a game record.
+        """
+        self.cursor.execute('SELECT * FROM games;')
+        return self.cursor.fetchall()
