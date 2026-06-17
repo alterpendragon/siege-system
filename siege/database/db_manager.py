@@ -66,3 +66,15 @@ class DatabaseClient:
          WHERE id = ?;
         ''', (new_status, game_id))
         self.connection.commit()
+
+    def delete_game(self, game_id):
+        """Deletes a game from the database.
+
+        Args:
+            game_id: The ID of the game to delete.
+        """
+        self.cursor.execute('''
+         DELETE FROM games
+         WHERE id = ?;
+        ''', (game_id,))
+        self.connection.commit()
