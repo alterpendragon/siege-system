@@ -103,3 +103,4 @@ class DatabaseClient:
     def close_connection(self):
         """Closes the database connection."""
         self.connection.close()
+        
