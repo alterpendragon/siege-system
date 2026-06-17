@@ -24,7 +24,9 @@ class DatabaseClient:
             title TEXT NOT NULL,
             genre TEXT,
             platform TEXT,
-            completion_status TEXT CHECK(completion_status IN ('Backlog', 'Playing', 'Completed', 'Dropped')) NOT NULL DEFAULT 'Backlog',
+            completion_status TEXT CHECK(completion_status IN
+                ('Backlog', 'Playing', 'Completed', 'Dropped'))
+                NOT NULL DEFAULT 'Backlog',
             date_added DATETIME DEFAULT CURRENT_TIMESTAMP
         );
         ''')
@@ -58,7 +60,8 @@ class DatabaseClient:
 
         Args:
             game_id: The ID of the game to update.
-            new_status: The new completion status (e.g., 'Playing', 'Completed').
+            new_status: The new completion status (e.g.,
+                'Playing', 'Completed').
         """
         self.cursor.execute('''
          UPDATE games
@@ -78,3 +81,22 @@ class DatabaseClient:
          WHERE id = ?;
         ''', (game_id,))
         self.connection.commit()
+
+    def filter_games(self, genre=None, status=None):
+        """Filters games based on genre and/or completion status.
+
+        Args:
+            genre: The genre to filter by (optional).
+            status: The completion status to filter by (optional).
+        """
+        query = 'SELECT * FROM games WHERE 1=1'
+        params = []
+        if genre:
+            query += ' AND genre LIKE ?'
+            params.append(f"%{genre}%")
+        if status:
+            query += ' AND completion_status = ?'
+            params.append(status)
+        self.cursor.execute(query, params)
+        return self.cursor.fetchall()
+    
