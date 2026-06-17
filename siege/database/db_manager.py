@@ -29,3 +29,17 @@ class DatabaseClient:
         );
         ''')
         self.connection.commit()
+
+    def add_game(self, title, genre=None, platform=None):
+        """Adds a new game to the database.
+
+        Args:
+            title: The title of the game.
+            genre: The genre of the game.
+            platform: The platform of the game.
+        """
+        self.cursor.execute('''
+         INSERT INTO games (title, genre, platform)
+         VALUES (?, ?, ?);
+        ''', (title, genre, platform))
+        self.connection.commit()
