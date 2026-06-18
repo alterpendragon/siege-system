@@ -40,11 +40,15 @@ class DatabaseClient:
             genre: The genre of the game.
             platform: The platform of the game.
         """
-        self.cursor.execute('''
-         INSERT INTO games (title, genre, platform)
-         VALUES (?, ?, ?);
-        ''', (title, genre, platform))
-        self.connection.commit()
+        try:
+            self.cursor.execute('''
+            INSERT INTO games (title, genre, platform)
+            VALUES (?, ?, ?);
+            ''', (title, genre, platform))
+            self.connection.commit()
+            return True
+        except sqlite3.IntegrityError:
+            return False
 
     def get_all_games(self):
         """Retrieves all games from the database.
