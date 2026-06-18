@@ -63,12 +63,16 @@ class DatabaseClient:
             new_status: The new completion status (e.g.,
                 'Playing', 'Completed').
         """
-        self.cursor.execute('''
-         UPDATE games
-         SET completion_status = ?
-         WHERE id = ?;
-        ''', (new_status, game_id))
-        self.connection.commit()
+        try:
+            self.cursor.execute('''
+             UPDATE games
+             SET completion_status = ?
+             WHERE id = ?;
+            ''', (new_status, game_id))
+            self.connection.commit()
+            return True
+        except sqlite3.IntegrityError:
+            return False
 
     def delete_game(self, game_id):
         """Deletes a game from the database.
