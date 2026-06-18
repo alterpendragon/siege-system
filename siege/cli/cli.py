@@ -52,6 +52,16 @@ def main():
                         print("Error adding game, try again.")
                 except (ValueError, IndexError):
                     print("Invalid input.")
+        elif choice == '4':
+            try:
+                game_id = int(input("Enter game ID to delete: "))
+                success = db.delete_game(game_id)
+                if success:
+                    print("Game deleted successfully.")
+                else:
+                    print("Error deleting game, try again.")
+            except ValueError:
+                print("Invalid input.")
         elif choice == '6':
             print("Connection terminated.")
             break
