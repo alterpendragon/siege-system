@@ -62,6 +62,18 @@ def main():
                     print("Error deleting game, try again.")
             except ValueError:
                 print("Invalid input.")
+        elif choice == '5':
+            try:
+                game_id = int(input("Enter game ID to update: "))
+                new_status = input("New status: ")
+                new_status = new_status.capitalize()
+                success = db.update_status(game_id, new_status)
+                if success:
+                    print("Status updated successfully.")
+                else:
+                    print("Error updating status, try again.")
+            except ValueError:
+                print("Invalid input.")
         elif choice == '6':
             print("Connection terminated.")
             break
