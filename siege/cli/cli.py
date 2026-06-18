@@ -18,14 +18,40 @@ def main():
         if choice == '1':
             games = db.get_all_games()
             for game in games:
-                print(f"{game[0]} | {game[1]} | {game[2]} | {game[3]} | {game[4]}")
+                print(f"{game[0]} | {game[1]} | {game[2]} |"
+                      f" {game[3]} | {game[4]}")
         elif choice == '2':
             genre = input("Genre (leave blank to skip): ")
             status = input("Status (leave blank to skip): ")
             status = status.capitalize()
             filtered_games = db.filter_games(genre=genre, status=status)
             for game in filtered_games:
-                print(f"{game[0]} | {game[1]} | {game[2]} | {game[3]} | {game[4]}")
+                print(f"{game[0]} | {game[1]} | {game[2]} |"
+                      f" {game[3]} | {game[4]}")
+        elif choice == '3':
+            title = input("Game title: ")
+            game_data = client.search_games(title)
+            if game_data is None:
+                print("Error fetching game data.")
+            elif game_data == []:
+                print("No results found.")
+            else:
+                for index, game in enumerate(game_data):
+                    print(f"{index + 1}. {game['name']}")
+                try:
+                    selection = int(input("Select a game by number: ")) - 1
+                    chosen_game = game_data[selection]
+                    game_dict = game_to_dictionary(chosen_game)
+                    success = db.add_game(
+                        game_dict['title'], game_dict['genre'],
+                        game_dict['platform']
+                    )
+                    if success:
+                        print("Game added successfully.")
+                    else:
+                        print("Error adding game, try again.")
+                except (ValueError, IndexError):
+                    print("Invalid input.")
         elif choice == '6':
             print("Connection terminated.")
             break
