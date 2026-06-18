@@ -11,3 +11,14 @@ class RawgClient:
         load_dotenv()
         self.api_key = os.getenv('RAWG_API_KEY')
         self.base_url = 'https://api.rawg.io/api'
+    
+    def search_games(self, title):
+        """Searches for games by title.
+
+        Args:
+            title: The title of the game to search for.
+        """
+        url = self.base_url + "/games"
+        params = {"key": self.api_key, "search": title, "page_size": 5}
+        response = requests.get(url, params=params)
+        return response.json()
