@@ -83,12 +83,17 @@ class DatabaseClient:
 
         Args:
             game_id: The ID of the game to delete.
+
+        Returns:
+            True if the game was deleted successfully, False otherwise.
         """
+
         self.cursor.execute('''
          DELETE FROM games
          WHERE id = ?;
         ''', (game_id,))
         self.connection.commit()
+        return self.cursor.rowcount > 0
 
     def filter_games(self, genre=None, status=None):
         """Filters games based on genre and/or completion status.
