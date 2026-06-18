@@ -17,8 +17,17 @@ class RawgClient:
 
         Args:
             title: The title of the game to search for.
+
+        Returns:
+            A list of game results from the RAWG API, an empty list
+            when no results are found, or None if the request fails.
         """
         url = self.base_url + "/games"
         params = {"key": self.api_key, "search": title, "page_size": 5}
         response = requests.get(url, params=params)
-        return response.json()
+        if response.status_code == 200:
+            data = response.json()
+            return data['results']
+        else:
+            return None
+    
