@@ -1,3 +1,5 @@
+"""Command-line interface for the Siege System game backlog tracker."""
+
 from siege.database.db_manager import DatabaseClient
 from siege.api.rawg_client import RawgClient
 from siege.api.data_mapper import game_to_dictionary

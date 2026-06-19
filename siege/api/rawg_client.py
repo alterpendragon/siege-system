@@ -1,4 +1,7 @@
+"""Client for fetching game data from the RAWG Video Games Database API."""
+
 import os
+
 import requests
 from dotenv import load_dotenv
 

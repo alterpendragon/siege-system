@@ -1,6 +1,8 @@
+"""Maps raw RAWG API game data into the dictionary shape used by the CLI."""
+
+
 def game_to_dictionary(game_data):
-    """
-    Converts a game object to a dictionary.
+    """Converts a game object to a dictionary.
 
     Args:
         game_data: The game object to convert.

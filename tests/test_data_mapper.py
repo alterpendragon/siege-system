@@ -1,7 +1,13 @@
+"""Pytest suite for game_to_dictionary data mapper."""
+
 from siege.api.data_mapper import game_to_dictionary
 
+
 def test_game_to_dictionary():
-    # Raw shape matches the RAWG API response game_to_dictionary expects.
+    """Raw shape matches the RAWG API response game_to_dictionary expects.
+
+    Genres and platforms are flattened into comma-joined strings.
+    """
     sample_game = {
         "name": "Some Game",
         "genres": [{"name": "Action"}, {"name": "Adventure"}],

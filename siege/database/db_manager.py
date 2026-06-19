@@ -1,3 +1,5 @@
+"""SQLite-backed client for managing the games backlog table."""
+
 import sqlite3
 
 class DatabaseClient:
@@ -39,6 +41,9 @@ class DatabaseClient:
             title: The title of the game.
             genre: The genre of the game.
             platform: The platform of the game.
+
+        Returns:
+            True if the game was added successfully, False otherwise.
         """
         try:
             self.cursor.execute('''
@@ -66,6 +71,9 @@ class DatabaseClient:
             game_id: The ID of the game to update.
             new_status: The new completion status (e.g.,
                 'Playing', 'Completed').
+
+        Returns:
+            True if the update succeeded, False otherwise.
         """
         try:
             self.cursor.execute('''
@@ -101,6 +109,9 @@ class DatabaseClient:
         Args:
             genre: The genre to filter by (optional).
             status: The completion status to filter by (optional).
+
+        Returns:
+            A list of tuples, each representing a matching game record.
         """
         query = 'SELECT * FROM games WHERE 1=1'
         params = []
