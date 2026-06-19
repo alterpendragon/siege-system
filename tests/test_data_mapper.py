@@ -17,7 +17,7 @@ def test_game_to_dictionary():
         ]
     }
     result = game_to_dictionary(sample_game)
-    # Genres and platforms are flattened into comma-joined strings.
+    """ Genres and platforms are flattened into comma-joined strings. """
     assert result['title'] == "Some Game"
     assert result['genre'] == "Action, Adventure"
     assert result['platform'] == "PC, PlayStation 5"
