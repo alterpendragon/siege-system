@@ -27,7 +27,7 @@ Siege System solves this locally. Search for a game by title, pull accurate meta
 ## Installation
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/alterpendragon/siege-system.git
 cd siege-system
 python3 -m venv .venv
 source .venv/bin/activate
