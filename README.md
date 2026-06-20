@@ -33,6 +33,7 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
+> **Note:** these commands are written for macOS/Linux. On Windows, use `python` instead of `python3`, and activate the virtual environment with `.venv\Scripts\activate` (Command Prompt) or `.venv\Scripts\Activate.ps1` (PowerShell) instead of `source .venv/bin/activate`.
 
 Create a `.env` file in the project root with your RAWG API key:
 
