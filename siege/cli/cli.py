@@ -17,6 +17,7 @@ def main():
         print("5. Update status")
         print("6. Exit system")
         choice = input("Select option: ")
+        print()
         if choice == '1':
             games = db.get_all_games()
             for game in games:
