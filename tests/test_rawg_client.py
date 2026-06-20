@@ -4,6 +4,7 @@ tests don't hit the real RAWG API."""
 from unittest.mock import patch, Mock
 
 import pytest
+import requests
 
 from siege.api.rawg_client import RawgClient
 
@@ -39,5 +40,14 @@ def test_search_game_api_failure():
         fake_response = Mock()
         fake_response.status_code = 403
         fake_get.return_value = fake_response
+        fake_ds = client.search_games("Dark Souls")
+        assert fake_ds is None
+
+
+def test_search_game_connection_error():
+    """A connection failure should yield None instead of crashing."""
+    client = RawgClient()
+    with patch("siege.api.rawg_client.requests.get") as fake_get:
+        fake_get.side_effect = requests.exceptions.ConnectionError("Connection error")
         fake_ds = client.search_games("Dark Souls")
         assert fake_ds is None

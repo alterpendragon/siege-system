@@ -27,10 +27,13 @@ class RawgClient:
         """
         url = self.base_url + "/games"
         params = {"key": self.api_key, "search": title, "page_size": 5}
-        response = requests.get(url, params=params)
-        if response.status_code == 200:
-            data = response.json()
-            return data['results']
-        else:
+        try:
+            response = requests.get(url, params=params, timeout=5)
+            if response.status_code == 200:
+                data = response.json()
+                return data['results']
+            else:
+                return None
+        except requests.exceptions.RequestException:
             return None
     
