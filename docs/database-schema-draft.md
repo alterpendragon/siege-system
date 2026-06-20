@@ -14,7 +14,7 @@ Before defining the schema, several deliberate architectural trade-offs were mad
 The following SQL statement defines the exact structure of the `games` table:
 
 ```sql
-CREATE TABLE games (
+CREATE TABLE IF NOT EXISTS games (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL,
     genre TEXT,
