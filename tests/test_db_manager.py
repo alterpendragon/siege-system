@@ -10,7 +10,9 @@ from siege.database.db_manager import DatabaseClient
 @pytest.fixture
 def db_client():
     """Provides a DatabaseClient backed by an in-memory database."""
-    return DatabaseClient(db_path=":memory:")
+    client = DatabaseClient(db_path=":memory:")
+    yield client
+    client.close_connection()
 
 
 def test_add_game_success(db_client):
