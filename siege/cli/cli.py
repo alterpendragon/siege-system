@@ -79,4 +79,5 @@ def main():
         elif choice == '6':
             print("Connection terminated.")
             break
-        
+        else:
+            print("Invalid option, try again.")

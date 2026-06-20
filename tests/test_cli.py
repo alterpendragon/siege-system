@@ -291,3 +291,33 @@ def test_cli_option_5_update_status_failure(mock_dependencies, capsys):
 
     captured = capsys.readouterr()
     assert "Error updating status, try again." in captured.out
+
+
+def test_cli_option_5_update_status_invalid_input(mock_dependencies, capsys):
+    """Test option 5: Enter a non-numeric string for game ID.
+
+    The test verifies that entering an invalid string instead of a game ID
+    is caught by the exception block and does not call the database.
+
+    Args:
+        mock_dependencies: The mocked database and API clients.
+        capsys: Pytest fixture to capture stdout and stderr.
+    """
+    db, _ = mock_dependencies
+
+    with patch(
+        "builtins.input", side_effect=["5", "abc", "6"]
+    ):
+        main()
+
+    captured = capsys.readouterr()
+    assert "Invalid input." in captured.out
+    db.update_status.assert_not_called()
+
+
+def test_cli_invalid_input(mock_dependencies, capsys):
+    """Test entering an invalid option in the main menu."""
+    with patch("builtins.input", side_effect=["abc", "6"]):
+        main()
+    captured = capsys.readouterr()
+    assert "Invalid option, try again." in captured.out
