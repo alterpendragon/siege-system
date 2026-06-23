@@ -82,7 +82,7 @@ class DatabaseClient:
              WHERE id = ?;
             ''', (new_status, game_id))
             self.connection.commit()
-            return True
+            return self.cursor.rowcount > 0
         except sqlite3.IntegrityError:
             return False
 

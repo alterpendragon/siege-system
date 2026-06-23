@@ -10,11 +10,11 @@ def game_to_dictionary(game_data):
     Returns:
         A dictionary representation of the game object.
     """
-    genre_list = [genre_item['name'] for genre_item in game_data['genres']]
+    genre_list = [genre_item['name'] for genre_item in game_data.get('genres', [])]
     genre = ", ".join(genre_list)
     platform_list = [
         platform_item['platform']['name']
-        for platform_item in game_data['platforms']
+        for platform_item in game_data.get('platforms', [])
         ]
     platform = ", ".join(platform_list)
     return {
