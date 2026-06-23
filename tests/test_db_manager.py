@@ -49,6 +49,13 @@ def test_update_game_status_invalid_value(db_client):
     assert not db_client.update_status(game_id, "Finished")
 
 
+def test_update_status_nonexistent_id(db_client):
+    """999 is assumed to never collide with an autoincremented
+    id from a fresh db."""
+    db_client.add_game("Test Game", "Action", "PC")
+    assert not db_client.update_status(999, "Completed")
+
+
 def test_delete_game_success(db_client):
     """Deleting an existing game succeeds."""
     db_client.add_game("Test Game", "Action", "PC")

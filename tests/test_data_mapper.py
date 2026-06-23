@@ -21,3 +21,35 @@ def test_game_to_dictionary():
     assert result['title'] == "Some Game"
     assert result['genre'] == "Action, Adventure"
     assert result['platform'] == "PC, PlayStation 5"
+
+
+def test_game_to_dictionary_missing_genres():
+    """RAWG doesn't guarantee the genres key is populated.
+
+    Missing genres should fall back to an empty string instead
+    of raising a KeyError.
+    """
+    sample_game = {
+        "name": "Some Game",
+        "platforms": [{"platform": {"name": "PC"}}]
+    }
+    result = game_to_dictionary(sample_game)
+    assert result['title'] == "Some Game"
+    assert result['genre'] == ""
+    assert result['platform'] == "PC"
+
+
+def test_game_to_dictionary_missing_platforms():
+    """RAWG doesn't guarantee the platforms key is populated.
+
+    Missing platforms should fall back to an empty string instead
+    of raising a KeyError.
+    """
+    sample_game = {
+        "name": "Some Game",
+        "genres": [{"name": "Action"}]
+    }
+    result = game_to_dictionary(sample_game)
+    assert result['title'] == "Some Game"
+    assert result['genre'] == "Action"
+    assert result['platform'] == ""
