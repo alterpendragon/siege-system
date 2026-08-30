@@ -1,8 +1,8 @@
 # Siege System
 
-A local, CLI-based video game backlog management tool and recommendation engine.
+A local, CLI-based video game backlog management tool.
 
-> **Note:** This project is currently under active development. v1.0.0 covers a CLI/SQLite backend; a web interface and AI-driven recommendations are planned for later versions (see [docs/roadmap.md](docs/roadmap.md)).
+This is a complete, self-contained project — scope was intentionally limited to a local CLI/SQLite backend.
 
 ## Overview
 
@@ -86,7 +86,7 @@ The test suite (`tests/`) covers the CLI flow, the RAWG client (with HTTP calls 
 │       └── db_manager.py       # DatabaseClient: SQLite connection and CRUD
 ├── tests/                      # PyTest suite
 ├── requirements.txt
-└── docs/                       # Planning docs (requirements, roadmap, schema, conventions)
+└── docs/                       # Planning docs (requirements, schema, conventions)
 ```
 
 ## Architecture
@@ -97,11 +97,11 @@ The codebase is split into three decoupled layers:
 - **`api/`** — `rawg_client.py` handles HTTP communication with RAWG; `data_mapper.py` separately converts RAWG's nested JSON response into the flat shape the app uses internally. Splitting these means the API client doesn't need to know the app's internal data shape, and the mapping logic can be unit-tested without making real HTTP requests.
 - **`cli/`** — the only layer that talks to the user; it orchestrates calls into the database and API layers.
 
-This separation keeps each layer independently testable and means a future web interface could reuse the `database` and `api` packages unchanged.
+The layers were kept decoupled by design — a discipline that would have made a future web interface straightforward, had the project continued past v1.0.0.
 
 ### Database schema
 
-A single `games` table is used for v1.0.0. RAWG returns `genre` and `platform` as arrays, which are serialized into comma-separated strings (e.g. `"Action, RPG"`) before insertion, trading normalization for simplicity at this stage. `completion_status` is constrained at the database level via `CHECK(completion_status IN ('Backlog', 'Playing', 'Completed', 'Dropped'))`, since SQLite has no native enum type — this guarantees invalid statuses can never be written regardless of which caller writes to the table.
+A single `games` table is used. RAWG returns `genre` and `platform` as arrays, which are serialized into comma-separated strings (e.g. `"Action, RPG"`) before insertion, trading normalization for simplicity. `completion_status` is constrained at the database level via `CHECK(completion_status IN ('Backlog', 'Playing', 'Completed', 'Dropped'))`, since SQLite has no native enum type — this guarantees invalid statuses can never be written regardless of which caller writes to the table.
 
 ```sql
 CREATE TABLE IF NOT EXISTS games (
@@ -115,12 +115,3 @@ CREATE TABLE IF NOT EXISTS games (
 ```
 
 See [docs/database-schema-draft.md](docs/database-schema-draft.md) for the full rationale.
-
-## Roadmap
-
-- **v1.0.0** — CLI + SQLite backend foundation (current)
-- **v2.0.0** — Flask web interface, Docker, CI/CD
-- **v3.0.0** — Anthropic API recommendation engine, MCP server
-- **v4.0.0** — TypeScript port and production hardening
-
-Full details in [docs/roadmap.md](docs/roadmap.md).

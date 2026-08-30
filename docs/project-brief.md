@@ -1,7 +1,7 @@
 # Siege System - Project Brief
 
 ## 1. Mission Statement
-Siege System is a video game backlog management tool and recommendation engine. The ultimate architectural vision is a full Web Application and an MCP (Model Context Protocol) server. However, **v1.0.0 focuses strictly on building a foundational backend core.**
+Siege System is a local video game backlog management tool.
 
 ## 2. The Problem
 Gamers often suffer from "backlog paralysis." They accumulate hundreds of unplayed games across multiple storefronts (Steam, Epic, PlayStation, etc.), lacking a unified, store-agnostic, fast, and local system to track ownership, completion status, and filter what to play next.
