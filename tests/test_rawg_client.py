@@ -3,7 +3,6 @@ tests don't hit the real RAWG API."""
 
 from unittest.mock import patch, Mock
 
-import pytest
 import requests
 
 from siege.api.rawg_client import RawgClient
@@ -51,3 +50,28 @@ def test_search_game_connection_error():
         fake_get.side_effect = requests.exceptions.ConnectionError("Connection error")
         fake_ds = client.search_games("Dark Souls")
         assert fake_ds is None
+
+
+def test_search_game_timeout():
+    """A request timeout is a RequestException and yields None."""
+    client = RawgClient()
+    with patch("siege.api.rawg_client.requests.get") as fake_get:
+        fake_get.side_effect = requests.exceptions.Timeout("timed out")
+        assert client.search_games("Dark Souls") is None
+
+
+def test_search_game_invalid_json_returns_none():
+    """requests.json() raises JSONDecodeError, a RequestException subclass.
+
+    The client therefore returns None rather than propagating the error.
+    """
+    client = RawgClient()
+    with patch("siege.api.rawg_client.requests.get") as fake_get:
+        fake_response = Mock()
+        fake_response.status_code = 200
+        fake_response.json.side_effect = requests.exceptions.JSONDecodeError(
+            "Expecting value", "doc", 0
+        )
+        fake_get.return_value = fake_response
+        assert client.search_games("Dark Souls") is None
+

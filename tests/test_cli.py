@@ -321,3 +321,77 @@ def test_cli_invalid_input(mock_dependencies, capsys):
         main()
     captured = capsys.readouterr()
     assert "Invalid option, try again." in captured.out
+
+
+def test_cli_option_1_empty_backlog(mock_dependencies, capsys):
+    """Test option 1: An empty backlog prints no game rows."""
+    db, _ = mock_dependencies
+    db.get_all_games.return_value = []
+
+    with patch("builtins.input", side_effect=["1", "6"]):
+        main()
+
+    captured = capsys.readouterr()
+    db.get_all_games.assert_called_once()
+    assert " | " not in captured.out
+    assert "Connection terminated." in captured.out
+
+
+def test_cli_option_2_blank_filters(mock_dependencies, capsys):
+    """Test option 2: Blank genre and status are forwarded as empty strings.
+
+    Status is still passed through str.capitalize, which leaves '' unchanged.
+    """
+    db, _ = mock_dependencies
+    db.filter_games.return_value = []
+
+    with patch("builtins.input", side_effect=["2", "", "", "6"]):
+        main()
+
+    db.filter_games.assert_called_with(genre="", status="")
+    captured = capsys.readouterr()
+    assert " | " not in captured.out
+
+
+def test_cli_option_3_add_game_value_error(mock_dependencies, capsys):
+    """Test option 3: A non-numeric selection is Invalid input."""
+    db, client = mock_dependencies
+    client.search_games.return_value = [{"name": "Elden Ring"}]
+
+    with patch("builtins.input", side_effect=["3", "Elden", "abc", "6"]):
+        main()
+
+    captured = capsys.readouterr()
+    assert "Invalid input." in captured.out
+    db.add_game.assert_not_called()
+
+
+def test_cli_option_3_selection_zero_picks_last_result(
+    mock_dependencies, capsys
+):
+    """Test option 3: Selecting 0 uses Python negative indexing.
+
+    int('0') - 1 is -1, so the last search result is added.
+    """
+    db, client = mock_dependencies
+    client.search_games.return_value = [
+        {
+            "name": "First Game",
+            "genres": [{"name": "Action"}],
+            "platforms": [{"platform": {"name": "PC"}}],
+        },
+        {
+            "name": "Last Game",
+            "genres": [{"name": "RPG"}],
+            "platforms": [{"platform": {"name": "PS5"}}],
+        },
+    ]
+    db.add_game.return_value = True
+
+    with patch("builtins.input", side_effect=["3", "Game", "0", "6"]):
+        main()
+
+    captured = capsys.readouterr()
+    db.add_game.assert_called_with("Last Game", "RPG", "PS5")
+    assert "Game added successfully." in captured.out
+

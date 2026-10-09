@@ -1,5 +1,7 @@
 """Pytest suite for game_to_dictionary data mapper."""
 
+import pytest
+
 from siege.api.data_mapper import game_to_dictionary
 
 
@@ -53,3 +55,29 @@ def test_game_to_dictionary_missing_platforms():
     assert result['title'] == "Some Game"
     assert result['genre'] == "Action"
     assert result['platform'] == ""
+
+
+def test_game_to_dictionary_null_genres_raises():
+    """A present but null genres list is not treated as missing.
+
+    game_data.get('genres', []) only substitutes when the key is absent,
+    so None is iterated and raises TypeError.
+    """
+    sample_game = {
+        "name": "Some Game",
+        "genres": None,
+        "platforms": [{"platform": {"name": "PC"}}],
+    }
+    with pytest.raises(TypeError):
+        game_to_dictionary(sample_game)
+
+
+def test_game_to_dictionary_incomplete_platform_raises():
+    """Platform entries are assumed to contain a nested platform.name."""
+    sample_game = {
+        "name": "Some Game",
+        "genres": [{"name": "Action"}],
+        "platforms": [{}],
+    }
+    with pytest.raises(KeyError):
+        game_to_dictionary(sample_game)

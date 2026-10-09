@@ -69,6 +69,12 @@ Select an option by number and follow the prompts. Adding a game searches RAWG b
 pytest
 ```
 
+`pytest` also prints a terminal coverage report for the `siege` package (`--cov=siege --cov-report=term-missing` is set in `pytest.ini`). To write an HTML report as well:
+
+```bash
+pytest --cov-report=html
+```
+
 The test suite (`tests/`) covers the CLI flow, the RAWG client (with HTTP calls mocked), the API-to-dictionary data mapper, and the database layer.
 
 ## Project Structure
