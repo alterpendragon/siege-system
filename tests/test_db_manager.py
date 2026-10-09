@@ -4,6 +4,7 @@ import sqlite3
 
 import pytest
 
+from siege.constants import DEFAULT_GAME_STATUS, GAME_STATUSES
 from siege.database.db_manager import DatabaseClient
 
 
@@ -34,11 +35,22 @@ def test_get_all_games(db_client):
     assert len(games) == 2
 
 
-def test_update_status_success(db_client):
+def test_game_status_contract():
+    """The shared constants define the exact status contract."""
+    assert GAME_STATUSES == (
+        "Backlog", "Playing", "Completed", "Dropped"
+    )
+    assert DEFAULT_GAME_STATUS == "Backlog"
+    assert DEFAULT_GAME_STATUS == GAME_STATUSES[0]
+
+
+@pytest.mark.parametrize("status", GAME_STATUSES)
+def test_update_status_success(db_client, status):
     """Updating a game's status to an allowed value succeeds."""
     db_client.add_game("Test Game", "Action", "PC")
     game_id = db_client.get_all_games()[0][0]
-    assert db_client.update_status(game_id, "Completed")
+    assert db_client.update_status(game_id, status)
+    assert db_client.get_all_games()[0][4] == status
 
 
 def test_update_game_status_invalid_value(db_client):
@@ -109,7 +121,7 @@ def test_add_game_defaults_genre_and_platform(db_client):
     assert row[1] == "Title Only"
     assert row[2] is None
     assert row[3] is None
-    assert row[4] == "Backlog"
+    assert row[4] == DEFAULT_GAME_STATUS
 
 
 def test_filter_games_by_genre_and_status(db_client):

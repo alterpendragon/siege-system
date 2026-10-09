@@ -95,6 +95,7 @@ The test suite (`tests/`) covers the CLI flow, the RAWG client (with HTTP calls 
 ├── .env.example                # Safe template for local API credentials
 ├── main.py                     # Entry point — launches the CLI
 ├── siege/
+│   ├── constants.py            # Canonical game statuses
 │   ├── api/
 │   │   ├── rawg_client.py      # RawgClient: wraps RAWG API requests
 │   │   └── data_mapper.py      # Maps raw RAWG JSON into the app's game dict shape
@@ -120,7 +121,7 @@ The layers were kept decoupled by design — a discipline that would have made a
 
 ### Database schema
 
-A single `games` table is used. RAWG returns `genre` and `platform` as arrays, which are serialized into comma-separated strings (e.g. `"Action, RPG"`) before insertion, trading normalization for simplicity. `completion_status` is constrained at the database level via `CHECK(completion_status IN ('Backlog', 'Playing', 'Completed', 'Dropped'))`, since SQLite has no native enum type — this guarantees invalid statuses can never be written regardless of which caller writes to the table.
+A single `games` table is used. RAWG returns `genre` and `platform` as arrays, which are serialized into comma-separated strings (e.g. `"Action, RPG"`) before insertion, trading normalization for simplicity. `completion_status` is constrained at the database level via `CHECK(completion_status IN ('Backlog', 'Playing', 'Completed', 'Dropped'))`, since SQLite has no native enum type — this guarantees invalid statuses can never be written regardless of which caller writes to the table. `GAME_STATUSES` in `siege/constants.py` is the application source of truth and is used to construct this SQLite constraint.
 
 ```sql
 CREATE TABLE IF NOT EXISTS games (
