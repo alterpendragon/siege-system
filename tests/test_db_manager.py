@@ -4,6 +4,7 @@ import sqlite3
 
 import pytest
 
+from siege.constants import DEFAULT_GAME_STATUS, GAME_STATUSES
 from siege.database.db_manager import DatabaseClient
 
 
@@ -34,11 +35,22 @@ def test_get_all_games(db_client):
     assert len(games) == 2
 
 
-def test_update_status_success(db_client):
+def test_game_status_contract():
+    """The shared constants define the exact status contract."""
+    assert GAME_STATUSES == (
+        "Backlog", "Playing", "Completed", "Dropped"
+    )
+    assert DEFAULT_GAME_STATUS == "Backlog"
+    assert DEFAULT_GAME_STATUS == GAME_STATUSES[0]
+
+
+@pytest.mark.parametrize("status", GAME_STATUSES)
+def test_update_status_success(db_client, status):
     """Updating a game's status to an allowed value succeeds."""
     db_client.add_game("Test Game", "Action", "PC")
     game_id = db_client.get_all_games()[0][0]
-    assert db_client.update_status(game_id, "Completed")
+    assert db_client.update_status(game_id, status)
+    assert db_client.get_all_games()[0][4] == status
 
 
 def test_update_game_status_invalid_value(db_client):
@@ -95,3 +107,65 @@ def test_close_connection(db_client):
     db_client.close_connection()
     with pytest.raises(sqlite3.ProgrammingError):
         db_client.cursor.execute("SELECT * FROM games;")
+
+
+def test_get_all_games_empty(db_client):
+    """A fresh database has no game rows."""
+    assert db_client.get_all_games() == []
+
+
+def test_add_game_defaults_genre_and_platform(db_client):
+    """Genre and platform are optional and stored as NULL."""
+    assert db_client.add_game("Title Only")
+    row = db_client.get_all_games()[0]
+    assert row[1] == "Title Only"
+    assert row[2] is None
+    assert row[3] is None
+    assert row[4] == DEFAULT_GAME_STATUS
+
+
+def test_filter_games_by_genre_and_status(db_client):
+    """Genre and status filters are applied together."""
+    db_client.add_game("Game A", "Action", "PC")
+    db_client.add_game("Game B", "Horror", "Console")
+    db_client.add_game("Game C", "Action", "PC")
+    action_ids = [
+        game[0] for game in db_client.get_all_games() if game[1] != "Game B"
+    ]
+    db_client.update_status(action_ids[0], "Completed")
+    db_client.update_status(action_ids[1], "Playing")
+
+    filtered = db_client.filter_games(genre="Action", status="Playing")
+    assert len(filtered) == 1
+    assert filtered[0][1] == "Game C"
+    assert filtered[0][4] == "Playing"
+
+
+def test_filter_games_no_criteria_returns_all(db_client):
+    """Omitting both filters returns every stored game."""
+    db_client.add_game("Test Game 1", "Action", "PC")
+    db_client.add_game("Test Game 2", "Horror", "Console")
+    assert len(db_client.filter_games()) == 2
+
+
+def test_filter_games_empty_strings_returns_all(db_client):
+    """Empty strings are falsy, so they skip both filter clauses."""
+    db_client.add_game("Test Game 1", "Action", "PC")
+    db_client.add_game("Test Game 2", "Horror", "Console")
+    filtered = db_client.filter_games(genre="", status="")
+    assert len(filtered) == 2
+
+
+def test_filter_games_genre_substring_match(db_client):
+    """Genre filtering uses SQL LIKE, so a token matches a CSV field."""
+    db_client.add_game("Multi Genre", "Action, RPG", "PC")
+    db_client.add_game("Single Genre", "Horror", "PC")
+    filtered = db_client.filter_games(genre="RPG")
+    assert len(filtered) == 1
+    assert filtered[0][1] == "Multi Genre"
+
+
+def test_filter_games_unknown_status_returns_empty(db_client):
+    """A status that cannot exist in the table matches no rows."""
+    db_client.add_game("Test Game", "Action", "PC")
+    assert db_client.filter_games(status="Finished") == []

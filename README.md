@@ -35,11 +35,14 @@ pip install -r requirements.txt
 ```
 > **Note:** these commands are written for macOS/Linux. On Windows, use `python` instead of `python3`, and activate the virtual environment with `.venv\Scripts\activate` (Command Prompt) or `.venv\Scripts\Activate.ps1` (PowerShell) instead of `source .venv/bin/activate`.
 
-Create a `.env` file in the project root with your RAWG API key:
+Copy the safe environment template, then replace the placeholder with your RAWG API key:
 
+```bash
+cp .env.example .env
 ```
-RAWG_API_KEY=your_api_key_here
-```
+
+On Windows Command Prompt, use `copy .env.example .env`. The real `.env`
+stays local and must not be committed.
 
 ## Usage
 
@@ -65,8 +68,22 @@ Select an option by number and follow the prompts. Adding a game searches RAWG b
 
 ## Running Tests
 
+Install the development dependencies, which include the runtime dependencies:
+
+```bash
+pip install -r requirements-dev.txt
+```
+
+Then run:
+
 ```bash
 pytest
+```
+
+`pytest` also prints a terminal coverage report for the `siege` package (`--cov=siege --cov-report=term-missing` is set in `pytest.ini`). To write an HTML report as well:
+
+```bash
+pytest --cov-report=html
 ```
 
 The test suite (`tests/`) covers the CLI flow, the RAWG client (with HTTP calls mocked), the API-to-dictionary data mapper, and the database layer.
@@ -75,8 +92,10 @@ The test suite (`tests/`) covers the CLI flow, the RAWG client (with HTTP calls 
 
 ```
 .
+├── .env.example                # Safe template for local API credentials
 ├── main.py                     # Entry point — launches the CLI
 ├── siege/
+│   ├── constants.py            # Canonical game statuses
 │   ├── api/
 │   │   ├── rawg_client.py      # RawgClient: wraps RAWG API requests
 │   │   └── data_mapper.py      # Maps raw RAWG JSON into the app's game dict shape
@@ -85,7 +104,8 @@ The test suite (`tests/`) covers the CLI flow, the RAWG client (with HTTP calls 
 │   └── database/
 │       └── db_manager.py       # DatabaseClient: SQLite connection and CRUD
 ├── tests/                      # PyTest suite
-├── requirements.txt
+├── requirements.txt            # Runtime dependencies
+├── requirements-dev.txt        # Runtime plus test/coverage dependencies
 └── docs/                       # Planning docs (requirements, schema, conventions)
 ```
 
@@ -101,7 +121,7 @@ The layers were kept decoupled by design — a discipline that would have made a
 
 ### Database schema
 
-A single `games` table is used. RAWG returns `genre` and `platform` as arrays, which are serialized into comma-separated strings (e.g. `"Action, RPG"`) before insertion, trading normalization for simplicity. `completion_status` is constrained at the database level via `CHECK(completion_status IN ('Backlog', 'Playing', 'Completed', 'Dropped'))`, since SQLite has no native enum type — this guarantees invalid statuses can never be written regardless of which caller writes to the table.
+A single `games` table is used. RAWG returns `genre` and `platform` as arrays, which are serialized into comma-separated strings (e.g. `"Action, RPG"`) before insertion, trading normalization for simplicity. `completion_status` is constrained at the database level via `CHECK(completion_status IN ('Backlog', 'Playing', 'Completed', 'Dropped'))`, since SQLite has no native enum type — this guarantees invalid statuses can never be written regardless of which caller writes to the table. `GAME_STATUSES` in `siege/constants.py` is the application source of truth and is used to construct this SQLite constraint.
 
 ```sql
 CREATE TABLE IF NOT EXISTS games (

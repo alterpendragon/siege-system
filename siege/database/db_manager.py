@@ -2,6 +2,8 @@
 
 import sqlite3
 
+from siege.constants import DEFAULT_GAME_STATUS, GAME_STATUSES
+
 class DatabaseClient:
     """Manages all direct interaction with the SQLite database,
     including connection handling and table initialization."""
@@ -20,15 +22,18 @@ class DatabaseClient:
         
     def create_table(self):
         """Creates the games table if it does not already exist."""
-        self.cursor.execute('''
+        allowed_statuses = ", ".join(
+            f"'{status}'" for status in GAME_STATUSES
+        )
+        self.cursor.execute(f'''
          CREATE TABLE IF NOT EXISTS games (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             title TEXT NOT NULL,
             genre TEXT,
             platform TEXT,
             completion_status TEXT CHECK(completion_status IN
-                ('Backlog', 'Playing', 'Completed', 'Dropped'))
-                NOT NULL DEFAULT 'Backlog',
+                ({allowed_statuses}))
+                NOT NULL DEFAULT '{DEFAULT_GAME_STATUS}',
             date_added DATETIME DEFAULT CURRENT_TIMESTAMP
         );
         ''')

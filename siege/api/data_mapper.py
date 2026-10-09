@@ -10,15 +10,33 @@ def game_to_dictionary(game_data):
     Returns:
         A dictionary representation of the game object.
     """
-    genre_list = [genre_item['name'] for genre_item in game_data.get('genres', [])]
-    genre = ", ".join(genre_list)
-    platform_list = [
-        platform_item['platform']['name']
-        for platform_item in game_data.get('platforms', [])
-        ]
-    platform = ", ".join(platform_list)
+    genres = game_data.get('genres', [])
+    if not isinstance(genres, list):
+        genres = []
+    genre_list = []
+    for genre_item in genres:
+        if not isinstance(genre_item, dict):
+            continue
+        name = genre_item.get('name')
+        if isinstance(name, str) and name.strip():
+            genre_list.append(name.strip())
+
+    platforms = game_data.get('platforms', [])
+    if not isinstance(platforms, list):
+        platforms = []
+    platform_list = []
+    for platform_item in platforms:
+        if not isinstance(platform_item, dict):
+            continue
+        platform_data = platform_item.get('platform')
+        if not isinstance(platform_data, dict):
+            continue
+        name = platform_data.get('name')
+        if isinstance(name, str) and name.strip():
+            platform_list.append(name.strip())
+
     return {
         'title': game_data['name'],
-        'genre': genre,
-        'platform': platform,
+        'genre': ", ".join(genre_list),
+        'platform': ", ".join(platform_list),
     }

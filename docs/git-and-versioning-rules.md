@@ -10,24 +10,35 @@ All commit messages must follow the [Conventional Commits](https://www.conventio
     * `docs`: Updating documentation.
     * `test`: Adding or updating tests.
     * `refactor`: Restructuring code without changing functionality.
+    * `chore`: Maintaining dependencies, configuration, or repository files.
 * **Imperative Mood Rule:** Always use the imperative mood (e.g., "add RAWG client", not "added" or "adding").
 
 ## 2. Branching Strategy
-To maintain a clean and professional workflow, the project uses a two-branch model:
+Keep `main` stable and test changes before merging them.
 
-* **`main`:** Stable branch. Contains only release-ready code. No direct commits allowed.
-* **`dev`:** Active development branch. All daily coding happens here. Once a major version (v1.0.0, v2.0.0, etc.) is complete, `dev` is merged into `main`.
+* **`main`:** Stable, release-ready code.
+* **`dev`:** Integration branch for changes being prepared for `main`.
+* **Short-lived branches:** When useful, create branches from `dev` using
+  descriptive prefixes such as `feat/`, `fix/`, `refactor/`, `test/`, or
+  `docs/`. Merge them back into `dev` after review and testing.
+* Review changes and run the test suite before merging. This is the project
+  workflow, not a claim of automated branch protection.
 
 ## 3. Release Policy
-* A release corresponds strictly to major versions as defined in the roadmap.
-* Once a version is feature complete and tested, merge `dev` into `main` and apply an annotated tag: `git tag -a vX.Y.Z -m "Release vX.Y.Z"`.
-* No intermediate or minor tags (e.g., no `v1.0.1`) are permitted.
+* Tag a tested release when a version is ready.
+* Use semantic `vX.Y.Z` version tags, including minor or patch versions when
+  appropriate.
+* Apply an annotated tag with
+  `git tag -a vX.Y.Z -m "Release vX.Y.Z"`.
 
 ## 4. .gitignore Rules
 The following files and folders must be excluded from version control to prevent security risks and repository bloat:
 
-* **Environment files:** `.env` (contains API keys/credentials).
+* **Environment files:** Local `.env` variants contain credentials.
+  `.env.example` is the safe template and remains tracked.
 * **Python artifacts:** `__pycache__/`, `*.pyc`.
 * **Dependencies:** `.venv/`.
 * **Database files:** `*.db` (contains machine-specific local data).
 * **System files:** `.DS_Store` (macOS metadata).
+* **Test artifacts:** `.pytest_cache/`, `.coverage*`, `coverage.xml`, and
+  `htmlcov/`.

@@ -39,6 +39,7 @@ def test_cli_option_1_view_backlog(mock_dependencies, capsys):
     captured = capsys.readouterr()
     assert "1 | Rainbow Six Siege | FPS | PC | Backlog" in captured.out
     assert "Connection terminated." in captured.out
+    db.close_connection.assert_called()
 
 
 def test_cli_option_2_filter_backlog(mock_dependencies, capsys):
@@ -321,3 +322,180 @@ def test_cli_invalid_input(mock_dependencies, capsys):
         main()
     captured = capsys.readouterr()
     assert "Invalid option, try again." in captured.out
+
+
+def test_cli_option_1_empty_backlog(mock_dependencies, capsys):
+    """Test option 1: An empty backlog prints no game rows."""
+    db, _ = mock_dependencies
+    db.get_all_games.return_value = []
+
+    with patch("builtins.input", side_effect=["1", "6"]):
+        main()
+
+    captured = capsys.readouterr()
+    db.get_all_games.assert_called_once()
+    assert " | " not in captured.out
+    assert "Connection terminated." in captured.out
+
+
+def test_cli_option_2_blank_filters(mock_dependencies, capsys):
+    """Test option 2: Blank genre and status are forwarded as empty strings.
+
+    Status is still passed through str.capitalize, which leaves '' unchanged.
+    """
+    db, _ = mock_dependencies
+    db.filter_games.return_value = []
+
+    with patch("builtins.input", side_effect=["2", "", "", "6"]):
+        main()
+
+    db.filter_games.assert_called_with(genre="", status="")
+    captured = capsys.readouterr()
+    assert " | " not in captured.out
+
+
+def test_cli_option_3_add_game_value_error(mock_dependencies, capsys):
+    """Test option 3: A non-numeric selection is Invalid input."""
+    db, client = mock_dependencies
+    client.search_games.return_value = [{"name": "Elden Ring"}]
+
+    with patch("builtins.input", side_effect=["3", "Elden", "abc", "6"]):
+        main()
+
+    captured = capsys.readouterr()
+    assert "Invalid input." in captured.out
+    db.add_game.assert_not_called()
+
+
+def test_cli_option_3_selection_zero_is_invalid(mock_dependencies, capsys):
+    """Test option 3: Selecting 0 is out of range, not the last result."""
+    db, client = mock_dependencies
+    client.search_games.return_value = [
+        {
+            "name": "First Game",
+            "genres": [{"name": "Action"}],
+            "platforms": [{"platform": {"name": "PC"}}],
+        },
+        {
+            "name": "Last Game",
+            "genres": [{"name": "RPG"}],
+            "platforms": [{"platform": {"name": "PS5"}}],
+        },
+    ]
+
+    with patch("builtins.input", side_effect=["3", "Game", "0", "6"]):
+        main()
+
+    captured = capsys.readouterr()
+    assert "Invalid input." in captured.out
+    db.add_game.assert_not_called()
+
+
+def test_cli_option_3_selection_negative_is_invalid(
+    mock_dependencies, capsys
+):
+    """Test option 3: A negative selection is Invalid input."""
+    db, client = mock_dependencies
+    client.search_games.return_value = [{"name": "Elden Ring"}]
+
+    with patch("builtins.input", side_effect=["3", "Elden", " -1 ", "6"]):
+        main()
+
+    captured = capsys.readouterr()
+    assert "Invalid input." in captured.out
+    db.add_game.assert_not_called()
+
+
+def test_cli_option_1_strips_padded_menu_choice(mock_dependencies, capsys):
+    """Padded menu numbers are accepted after strip."""
+    db, _ = mock_dependencies
+    db.get_all_games.return_value = [
+        (1, "Rainbow Six Siege", "FPS", "PC", "Backlog")
+    ]
+
+    with patch("builtins.input", side_effect=[" 1 ", "6"]):
+        main()
+
+    captured = capsys.readouterr()
+    assert "1 | Rainbow Six Siege | FPS | PC | Backlog" in captured.out
+
+
+def test_cli_option_2_strips_padded_filters(mock_dependencies, capsys):
+    """Filter genre and status are stripped before capitalize."""
+    db, _ = mock_dependencies
+    db.filter_games.return_value = []
+
+    with patch(
+        "builtins.input", side_effect=["2", "  RPG  ", "  playing  ", "6"]
+    ):
+        main()
+
+    db.filter_games.assert_called_with(genre="RPG", status="Playing")
+
+
+def test_cli_option_4_strips_padded_game_id(mock_dependencies, capsys):
+    """Delete accepts a padded numeric ID after strip."""
+    db, _ = mock_dependencies
+    db.delete_game.return_value = True
+
+    with patch("builtins.input", side_effect=["4", " 15 ", "6"]):
+        main()
+
+    db.delete_game.assert_called_with(15)
+
+
+def test_cli_option_5_strips_padded_id_and_status(
+    mock_dependencies, capsys
+):
+    """Update strips the ID and strip-then-capitalizes status."""
+    db, _ = mock_dependencies
+    db.update_status.return_value = True
+
+    with patch(
+        "builtins.input",
+        side_effect=["5", " 10 ", "  completed  ", "6"],
+    ):
+        main()
+
+    db.update_status.assert_called_with(10, "Completed")
+
+
+def test_cli_keyboard_interrupt(mock_dependencies, capsys):
+    """Ctrl+C exits with the same goodbye line and closes the DB."""
+    db, _ = mock_dependencies
+
+    with patch("builtins.input", side_effect=KeyboardInterrupt):
+        main()
+
+    captured = capsys.readouterr()
+    assert "Connection terminated." in captured.out
+    assert captured.err == ""
+    db.close_connection.assert_called()
+
+
+def test_cli_eof_error(mock_dependencies, capsys):
+    """EOF (Ctrl+D) exits with the same goodbye line and closes the DB."""
+    db, _ = mock_dependencies
+
+    with patch("builtins.input", side_effect=EOFError):
+        main()
+
+    captured = capsys.readouterr()
+    assert "Connection terminated." in captured.out
+    assert captured.err == ""
+    db.close_connection.assert_called()
+
+
+def test_cli_closes_db_if_rawg_client_init_fails():
+    """If RawgClient() raises after the DB is opened, still close it."""
+    with patch("siege.cli.cli.DatabaseClient") as mock_db_cls, \
+         patch(
+             "siege.cli.cli.RawgClient",
+             side_effect=RuntimeError("init failed"),
+         ):
+        db = mock_db_cls.return_value
+        with pytest.raises(RuntimeError, match="init failed"):
+            main()
+        db.close_connection.assert_called()
+
+
