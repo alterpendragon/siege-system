@@ -1,4 +1,7 @@
-# Python Code Style Rules - Siege System
+# Python Code Style Conventions - Siege System
+
+These conventions are followed through code review. The project does not use
+an automated linter or formatter.
 
 ## 1. Naming Conventions
 Following PEP 8 standards:
@@ -13,13 +16,16 @@ Imports must be grouped in the following order, with a blank line between each g
 3. Local application/library specific imports.
 
 ## 3. Docstring Format
-All public modules, classes, and functions must include a docstring. We follow the Google Style format:
+Public modules, classes, and functions should include a concise docstring.
+Use Google-style `Args:` and `Returns:` sections when they add useful
+information; simple functions do not need empty sections.
+
 * Use triple double quotes (`"""`).
-* Explain the purpose of the code, arguments (`Args:`), and return values (`Returns:`).
+* Explain the purpose of the code and any non-obvious arguments or return values.
 
 **Example:**
 ```python
-def fetch_game_data(title: str) -> dict:
+def fetch_game_data(title):
     """Fetches game metadata from the RAWG API.
 
     Args:
@@ -30,4 +36,5 @@ def fetch_game_data(title: str) -> dict:
     """
 ```
 ## 4. Maximum Line Length
-* Limit all lines to a maximum of **79 characters**. This ensures readability and consistency across different editors and screen sizes.
+* Aim for **79 characters** where practical. Longer lines are acceptable when
+  splitting them would reduce readability, such as URLs or clear expressions.
