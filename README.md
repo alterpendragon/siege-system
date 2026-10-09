@@ -35,11 +35,14 @@ pip install -r requirements.txt
 ```
 > **Note:** these commands are written for macOS/Linux. On Windows, use `python` instead of `python3`, and activate the virtual environment with `.venv\Scripts\activate` (Command Prompt) or `.venv\Scripts\Activate.ps1` (PowerShell) instead of `source .venv/bin/activate`.
 
-Create a `.env` file in the project root with your RAWG API key:
+Copy the safe environment template, then replace the placeholder with your RAWG API key:
 
+```bash
+cp .env.example .env
 ```
-RAWG_API_KEY=your_api_key_here
-```
+
+On Windows Command Prompt, use `copy .env.example .env`. The real `.env`
+stays local and must not be committed.
 
 ## Usage
 
@@ -65,6 +68,14 @@ Select an option by number and follow the prompts. Adding a game searches RAWG b
 
 ## Running Tests
 
+Install the development dependencies, which include the runtime dependencies:
+
+```bash
+pip install -r requirements-dev.txt
+```
+
+Then run:
+
 ```bash
 pytest
 ```
@@ -81,6 +92,7 @@ The test suite (`tests/`) covers the CLI flow, the RAWG client (with HTTP calls 
 
 ```
 .
+├── .env.example                # Safe template for local API credentials
 ├── main.py                     # Entry point — launches the CLI
 ├── siege/
 │   ├── api/
@@ -91,7 +103,8 @@ The test suite (`tests/`) covers the CLI flow, the RAWG client (with HTTP calls 
 │   └── database/
 │       └── db_manager.py       # DatabaseClient: SQLite connection and CRUD
 ├── tests/                      # PyTest suite
-├── requirements.txt
+├── requirements.txt            # Runtime dependencies
+├── requirements-dev.txt        # Runtime plus test/coverage dependencies
 └── docs/                       # Planning docs (requirements, schema, conventions)
 ```
 

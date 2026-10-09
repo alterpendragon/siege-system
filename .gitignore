@@ -4,6 +4,8 @@
 
 # Security / Environment Variables
 .env
+.env.*
+!.env.example
 
 # Local Database
 # We do not want to commit the actual backlog data to GitHub
@@ -27,5 +29,7 @@ Thumbs.db
 
 # Test Coverage Reports
 .coverage
+.coverage.*
+coverage.xml
 htmlcov/
 .pytest_cache/
