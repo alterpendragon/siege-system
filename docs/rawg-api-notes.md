@@ -15,6 +15,7 @@ The API returns a paginated JSON object. Key field paths for extraction:
 * **Title:** `game['name']`
 * **Genres:** `genre['name']` (extracted from the `genres` array).
 * **Platforms:** `item['platform']['name']` (extracted from the `platforms` array, accessing the inner `platform` dictionary).
+* **Malformed Metadata:** Invalid genre or platform entries are skipped. Missing or invalid optional metadata is stored as an empty string.
 
 ## 4. Search Strategy
 * **Selection Logic:** To ensure data integrity, the system will not auto-select the first result.
@@ -25,8 +26,10 @@ The API returns a paginated JSON object. Key field paths for extraction:
 * **Error Handling:**
     * `200 OK (with results)`: Proceed with parsing.
     * `200 OK (empty results)`: Handle gracefully by informing the user that no matches were found.
-    * `403 Forbidden`: Validate API key.
-    * `429 Too Many Requests`: Implement wait/retry logic or notify the user to avoid service suspension.
+    * Missing credentials: Treat as a fetch failure without making a request.
+    * Invalid JSON or a malformed response shape: Treat as a fetch failure.
+    * Non-`200` responses, including `403 Forbidden` and `429 Too Many Requests`: Treat as a fetch failure.
+    * Retries are intentionally not performed in v1; the user may try again manually.
 
 ## 6. Architectural Implementation
 1. **Request Module:** Use `requests` library.

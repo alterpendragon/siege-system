@@ -57,27 +57,83 @@ def test_game_to_dictionary_missing_platforms():
     assert result['platform'] == ""
 
 
-def test_game_to_dictionary_null_genres_raises():
-    """A present but null genres list is not treated as missing.
-
-    game_data.get('genres', []) only substitutes when the key is absent,
-    so None is iterated and raises TypeError.
-    """
+def test_game_to_dictionary_null_genres():
+    """A null genres value maps to an empty string."""
     sample_game = {
         "name": "Some Game",
         "genres": None,
         "platforms": [{"platform": {"name": "PC"}}],
     }
-    with pytest.raises(TypeError):
-        game_to_dictionary(sample_game)
+    result = game_to_dictionary(sample_game)
+    assert result['title'] == "Some Game"
+    assert result['genre'] == ""
+    assert result['platform'] == "PC"
 
 
-def test_game_to_dictionary_incomplete_platform_raises():
-    """Platform entries are assumed to contain a nested platform.name."""
+def test_game_to_dictionary_skips_incomplete_platform():
+    """Malformed platform entries are omitted."""
     sample_game = {
         "name": "Some Game",
         "genres": [{"name": "Action"}],
         "platforms": [{}],
     }
+    result = game_to_dictionary(sample_game)
+    assert result['title'] == "Some Game"
+    assert result['genre'] == "Action"
+    assert result['platform'] == ""
+
+
+def test_game_to_dictionary_skips_malformed_metadata_entries():
+    """Valid metadata is retained in order while malformed entries are skipped."""
+    sample_game = {
+        "name": "Some Game",
+        "genres": [
+            {"name": "  Action  "},
+            None,
+            {},
+            {"name": ""},
+            {"name": 123},
+            {"name": "Adventure"},
+        ],
+        "platforms": [
+            {"platform": {"name": "  PC  "}},
+            None,
+            {},
+            {"platform": None},
+            {"platform": {}},
+            {"platform": {"name": ""}},
+            {"platform": {"name": 123}},
+            {"platform": {"name": "PlayStation 5"}},
+        ],
+    }
+    result = game_to_dictionary(sample_game)
+    assert result['genre'] == "Action, Adventure"
+    assert result['platform'] == "PC, PlayStation 5"
+
+
+@pytest.mark.parametrize("genres", ["Action", {}, 123])
+def test_game_to_dictionary_non_list_genres(genres):
+    """Non-list genre values map to an empty string."""
+    result = game_to_dictionary({
+        "name": "Some Game",
+        "genres": genres,
+        "platforms": [],
+    })
+    assert result['genre'] == ""
+
+
+@pytest.mark.parametrize("platforms", ["PC", {}, 123, None])
+def test_game_to_dictionary_non_list_platforms(platforms):
+    """Non-list platform values map to an empty string."""
+    result = game_to_dictionary({
+        "name": "Some Game",
+        "genres": [],
+        "platforms": platforms,
+    })
+    assert result['platform'] == ""
+
+
+def test_game_to_dictionary_missing_title_raises():
+    """Title remains required and is accessed directly."""
     with pytest.raises(KeyError):
-        game_to_dictionary(sample_game)
+        game_to_dictionary({"genres": [], "platforms": []})
