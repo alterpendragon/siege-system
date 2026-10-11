@@ -1,4 +1,4 @@
-# Siege System - v1.0.0 Requirements
+# Siege System - Requirements
 
 ## 1. Functional Requirements
 * The system shall allow the user to add a new game to the backlog via the CLI.

@@ -18,8 +18,8 @@ The API returns a paginated JSON object. Key field paths for extraction:
 * **Malformed Metadata:** Invalid genre or platform entries are skipped. Missing or invalid optional metadata is stored as an empty string.
 
 ## 4. Search Strategy
-* **Selection Logic:** To ensure data integrity, the system will not auto-select the first result.
-* **Workflow:** The system will fetch the top 5 matches and present them to the user for manual confirmation before proceeding to storage.
+* **Selection Logic:** To ensure data integrity, the system does not auto-select the first result.
+* **Workflow:** The system fetches the top 5 matches and presents them to the user for manual confirmation before proceeding to storage.
 
 ## 5. Reliability & Rate Limiting
 * **Rate Limiting:** Free tier is limited to 20,000 requests per month.
@@ -29,7 +29,7 @@ The API returns a paginated JSON object. Key field paths for extraction:
     * Missing credentials: Treat as a fetch failure without making a request.
     * Invalid JSON or a malformed response shape: Treat as a fetch failure.
     * Non-`200` responses, including `403 Forbidden` and `429 Too Many Requests`: Treat as a fetch failure.
-    * Retries are intentionally not performed in v1; the user may try again manually.
+    * Retries are intentionally not performed; the user may try again manually.
 
 ## 6. Architectural Implementation
 1. **Request Module:** Use `requests` library.
