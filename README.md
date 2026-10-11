@@ -1,8 +1,8 @@
 # Siege System
 
-A local, CLI-based video game backlog management tool.
+A complete, standalone CLI application for managing a local video game backlog.
 
-This is a complete, self-contained project — scope was intentionally limited to a local CLI/SQLite backend.
+Scope is a local terminal interface with SQLite persistence and RAWG metadata lookup — no web interface, accounts, or cloud services.
 
 ## Overview
 
@@ -106,7 +106,7 @@ The test suite (`tests/`) covers the CLI flow, the RAWG client (with HTTP calls 
 ├── tests/                      # PyTest suite
 ├── requirements.txt            # Runtime dependencies
 ├── requirements-dev.txt        # Runtime plus test/coverage dependencies
-└── docs/                       # Planning docs (requirements, schema, conventions)
+└── docs/                       # Project documentation (requirements, schema, conventions)
 ```
 
 ## Architecture
@@ -117,7 +117,7 @@ The codebase is split into three decoupled layers:
 - **`api/`** — `rawg_client.py` handles HTTP communication with RAWG; `data_mapper.py` separately converts RAWG's nested JSON response into the flat shape the app uses internally. Splitting these means the API client doesn't need to know the app's internal data shape, and the mapping logic can be unit-tested without making real HTTP requests.
 - **`cli/`** — the only layer that talks to the user; it orchestrates calls into the database and API layers.
 
-The layers were kept decoupled by design — a discipline that would have made a future web interface straightforward, had the project continued past v1.0.0.
+The layers are kept decoupled by design so each concern stays independently testable and maintainable.
 
 ### Database schema
 
@@ -134,4 +134,4 @@ CREATE TABLE IF NOT EXISTS games (
 );
 ```
 
-See [docs/database-schema-draft.md](docs/database-schema-draft.md) for the full rationale.
+See [docs/database-schema.md](docs/database-schema.md) for the full rationale.
