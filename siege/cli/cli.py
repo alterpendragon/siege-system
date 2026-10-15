@@ -12,6 +12,7 @@ def _print_games(games):
               f" {game[3]} | {game[4]}")
 
 
+# I ask of you, are you my Master?
 def main():
     """Main function to run the CLI menu loop."""
     db = DatabaseClient()
